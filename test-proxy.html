@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Proxy Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .result { margin: 20px 0; padding: 10px; border: 1px solid #ccc; }
+        .error { background-color: #ffebee; border-color: #f44336; }
+        .success { background-color: #e8f5e8; border-color: #4caf50; }
+    </style>
+</head>
+<body>
+    <h1>Proxy Test</h1>
+    <button onclick="testServer()">Test Server Connection</button>
+    <button onclick="testProxy()">Test Proxy</button>
+    <div id="result"></div>
+
+    <script>
+        async function testServer() {
+            const resultDiv = document.getElementById('result');
+            resultDiv.innerHTML = 'Testing server connection...';
+            
+            try {
+                // Test if server is responding
+                const response = await fetch('/');
+                resultDiv.innerHTML = `
+                    <div class="success">
+                        <h3>Server Connection Test:</h3>
+                        <p>Status: ${response.status}</p>
+                        <p>Server is running!</p>
+                    </div>
+                `;
+            } catch (error) {
+                resultDiv.innerHTML = `
+                    <div class="error">
+                        <h3>Server Connection Failed:</h3>
+                        <p>Error: ${error.message}</p>
+                        <p>Make sure the server is running on port 5500</p>
+                    </div>
+                `;
+            }
+        }
+
+        async function testProxy() {
+            const resultDiv = document.getElementById('result');
+            resultDiv.innerHTML = 'Testing proxy...';
+            
+            try {
+                // Test with a simple URL
+                const testUrl = 'https://httpbin.org/get';
+                const proxyUrl = `/api/proxy?url=${encodeURIComponent(testUrl)}`;
+                
+                console.log('Testing proxy URL:', proxyUrl);
+                
+                const response = await fetch(proxyUrl);
+                console.log('Response status:', response.status);
+                console.log('Response headers:', [...response.headers.entries()]);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                
+                const data = await response.json();
+                
+                resultDiv.innerHTML = `
+                    <div class="success">
+                        <h3>Proxy Test Result:</h3>
+                        <p>Status: ${response.status}</p>
+                        <p>Data: <pre>${JSON.stringify(data, null, 2)}</pre></p>
+                    </div>
+                `;
+            } catch (error) {
+                resultDiv.innerHTML = `
+                    <div class="error">
+                        <h3>Proxy Test Failed:</h3>
+                        <p>Error: ${error.message}</p>
+                        <p>Check the browser console for more details</p>
+                    </div>
+                `;
+            }
+        }
+    </script>
+</body>
+</html>

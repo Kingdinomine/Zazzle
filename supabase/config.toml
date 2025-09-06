@@ -1,0 +1,5 @@
+# Supabase Functions configuration
+# Use JavaScript entrypoints for Edge Functions.
+
+## Streaming Edge Functions have been removed in favor of client-side Service Worker streaming.
+## No Edge Functions are currently configured for streaming.

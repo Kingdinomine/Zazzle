@@ -1,0 +1,45 @@
+# Node
+node_modules/
+
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Build outputs
+.next/
+build/
+dist/
+.cache/
+coverage/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Env
+.env
+.env.local
+.env.*.local
+
+# Vercel
+.vercel/
+
+# Supabase local artifacts
+supabase/.temp/
+supabase/.cache/
+
+# IDE/editor
+.vscode/
+.idea/
+
+# Backups and archives
+*.zip
+backend-backup-*.zip
+
+# Misc
+*.swp
+*.swo

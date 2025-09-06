@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>zazzle- Free movies & series</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="search-results.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    
+</head>
+<body>
+    <!-- Navigation Bar -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-left">
+                <div class="logo">
+                    <div class="brand-slot">
+                        <a class="hbo-logo" id="brand-logo" href="index.html" data-text="zazzle">zazzle</a>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="nav-center">
+                <ul class="nav-menu">
+                    <li><a href="series.html" class="nav-link nav-link--series">SERIES</a></li>
+                    <li><a href="movies.html" class="nav-link nav-link--movies">MOVIES</a></li>
+                    <li><a href="animation.html" class="nav-link nav-link--animation">ANIMATION</a></li>
+                </ul>
+            </div>
+            
+            <div class="nav-right">
+                <button class="hamburger" aria-label="Open menu" aria-controls="mobile-drawer" aria-expanded="false">
+                    <span></span><span></span><span></span>
+                </button>
+                <div class="search-container" id="search">
+                    <i class="search-icon" data-lucide="search"></i>
+                    <span class="search-ghost" id="search-ghost" aria-hidden="true"></span>
+                    <input class="search-input" type="text" placeholder="Search movies, series..." aria-label="Search" autocomplete="off" />
+                    <div class="search-results-panel" id="search-results" aria-live="polite"></div>
+                </div>
+                <button class="get-hbo-btn">Sign up</button>
+                <button class="sign-in-btn">SIGN IN</button>
+            </div>
+        </div>
+    </nav>
+
+
+
+    <!-- Trailer Overlay -->
+    <div id="trailer-overlay" class="trailer-overlay" aria-hidden="true" role="dialog" aria-modal="true">
+        <div class="trailer-backdrop"></div>
+        <div class="trailer-dialog" role="document">
+            <button class="trailer-close" aria-label="Close trailer"><i data-lucide="x"></i></button>
+            <div class="trailer-frame-wrap">
+                <iframe id="trailer-frame" src="" title="YouTube trailer" frameborder="0" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen></iframe>
+            </div>
+        </div>
+    </div>
+
+    <div class="drawer-overlay" hidden></div>
+    <aside id="mobile-drawer" class="mobile-drawer" aria-hidden="true">
+        <nav class="drawer-nav" aria-label="Mobile Navigation">
+            <a href="series.html" class="drawer-link">Series</a>
+            <a href="movies.html" class="drawer-link">Movies</a>
+            <a href="animation.html" class="drawer-link">Animation</a>
+        </nav>
+    </aside>
+
+    <!-- Premium Search Results Interface -->
+    <div class="premium-search-container" id="search-results-container">
+        <div class="search-results-box">
+            <div class="search-header">
+                <h2 class="search-title" id="search-title">Search Results</h2>
+                <button class="close-search" id="close-search" aria-label="Close search">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                    </svg>
+                </button>
+            </div>
+
+            <!-- Movies Section -->
+            <div class="results-section" id="movies-section">
+                <div class="section-header">
+                    <h3 class="section-title">Movies</h3>
+                    <button class="see-all-btn" id="see-all-movies" data-type="movie">
+                        See All
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polyline points="9,6 15,12 9,18"></polyline>
+                        </svg>
+                    </button>
+                </div>
+                <div class="results-grid" id="movies-grid">
+                    <!-- Movie cards will be populated here -->
+                </div>
+            </div>
+
+            <!-- Series Section -->
+            <div class="results-section" id="series-section">
+                <div class="section-header">
+                    <h3 class="section-title">Series</h3>
+                    <button class="see-all-btn" id="see-all-series" data-type="tv">
+                        See All
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polyline points="9,6 15,12 9,18"></polyline>
+                        </svg>
+                    </button>
+                </div>
+                <div class="results-grid" id="series-grid">
+                    <!-- Series cards will be populated here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Hero Banner -->
+    <section class="hero-banner">
+        <div class="hero-background">
+            <img 
+                src="https://images.unsplash.com/photo-1536440136628-849c177e76a1?ixlib=rb-4.0.3&ixid=M3wxMJA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1280&q=80"
+                srcset="https://images.unsplash.com/photo-1536440136628-849c177e76a1?ixlib=rb-4.0.3&ixid=M3wxMJA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=800&q=70 800w, https://images.unsplash.com/photo-1536440136628-849c177e76a1?ixlib=rb-4.0.3&ixid=M3wxMJA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1280&q=80 1280w, https://images.unsplash.com/photo-1536440136628-849c177e76a1?ixlib=rb-4.0.3&ixid=M3wxMJA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1920&q=80 1920w"
+                sizes="100vw"
+                alt="Hero Background"
+                class="hero-bg-image">
+            <div class="hero-overlay"></div>
+        </div>
+        
+        <div class="hero-content">
+            <div class="schedule-tag">
+                <span class="schedule-text">SUNDAY 9 PM</span>
+            </div>
+            
+            <div class="hero-text" aria-live="polite">
+                <h1 class="hero-title"></h1>
+                <p class="hero-description"></p>
+                <button class="watch-trailer-btn" style="display: none;">
+                    <i data-lucide="play"></i>
+                    watch trailer
+                </button>
+            </div>
+
+            <!-- Carousel (populated via TMDB) -->
+            <div class="carousel" aria-label="Featured carousel">
+                <div class="carousel-track" role="list"></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Content Navigation -->
+    <div class="content-navigation">
+        <div class="nav-group nav-group-left">
+            <span class="nav-label">PREV</span>
+            <button class="nav-arrow nav-arrow-left" aria-label="Previous">
+                <i data-lucide="chevron-left"></i>
+            </button>
+        </div>
+        
+        <div class="nav-group nav-group-right">
+            <span class="nav-label">NEXT</span>
+            <button class="nav-arrow nav-arrow-right" aria-label="Next">
+                <i data-lucide="chevron-right"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/motion@10/dist/motion.min.js"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/supabase.min.js"></script>
+    <script src="supabaseClient.js?v=20250904T141709"></script>
+    <script src="search-results.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>

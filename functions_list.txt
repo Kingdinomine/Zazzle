@@ -1,0 +1,4 @@
+  
+   ID                                   | NAME       | SLUG       | STATUS | VERSION | UPDATED_AT (UTC)    
+  --------------------------------------|------------|------------|--------|---------|---------------------
+  No active Supabase functions. Streaming is handled client-side via Service Worker.

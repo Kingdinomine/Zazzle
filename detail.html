@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Cinematic Detail • zazzle</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="detail.css" />
+</head>
+<body>
+  <!-- Navigation Bar (transparent) -->
+  <nav class="navbar">
+    <div class="nav-container">
+      <div class="nav-left">
+        <div class="logo">
+          <div class="brand-slot">
+            <a class="hbo-logo" id="brand-logo" href="index.html" data-text="zazzle">zazzle</a>
+          </div>
+        </div>
+      </div>
+
+      <div class="nav-center">
+        <ul class="nav-menu">
+          <li><a href="series.html" class="nav-link nav-link--series">SERIES</a></li>
+          <li><a href="movies.html" class="nav-link nav-link--movies">MOVIES</a></li>
+          <li><a href="animation.html" class="nav-link nav-link--animation">ANIMATION</a></li>
+        </ul>
+      </div>
+
+      <div class="nav-right">
+        <button class="hamburger" aria-label="Open menu" aria-controls="mobile-drawer" aria-expanded="false">
+          <span></span><span></span><span></span>
+        </button>
+        <div class="search-container" id="search">
+          <i class="search-icon" data-lucide="search"></i>
+          <span class="search-ghost" id="search-ghost" aria-hidden="true"></span>
+          <input class="search-input" type="text" placeholder="Search movies, series..." aria-label="Search" autocomplete="off" />
+          <div class="search-results-panel" id="search-results" aria-live="polite"></div>
+        </div>
+        <button class="get-hbo-btn">Sign up</button>
+        <button class="sign-in-btn">SIGN IN</button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Trailer Overlay -->
+  <div id="trailer-overlay" class="trailer-overlay" aria-hidden="true" role="dialog" aria-modal="true">
+    <div class="trailer-backdrop"></div>
+    <div class="trailer-dialog" role="document">
+      <button class="trailer-close" aria-label="Close trailer"><i data-lucide="x"></i></button>
+      <div class="trailer-frame-wrap">
+        <iframe id="trailer-frame" src="" title="YouTube trailer" frameborder="0" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen></iframe>
+      </div>
+    </div>
+  </div>
+
+  <!-- Mobile Drawer from global styles -->
+  <div class="drawer-overlay" hidden></div>
+  <aside id="mobile-drawer" class="mobile-drawer" aria-hidden="true">
+    <nav class="drawer-nav" aria-label="Mobile Navigation">
+      <a href="series.html" class="drawer-link">Series</a>
+      <a href="movies.html" class="drawer-link">Movies</a>
+      <a href="animation.html" class="drawer-link">Animation</a>
+    </nav>
+  </aside>
+
+  <!-- Detail Page -->
+  <div class="detail-page">
+    <!-- Full-screen background -->
+    <div class="detail-bg">
+      <img id="detail-bg-img" class="detail-bg-image" alt="Background" />
+      <div class="detail-bg-overlay"></div>
+    </div>
+
+    <!-- Main content layout -->
+    <main class="detail-content">
+      <!-- Left section: Title, description, buttons, trailer -->
+      <section class="detail-left">
+        <div class="detail-info">
+          <h1 id="detail-title" class="detail-title">Loading…</h1>
+          <p id="detail-overview" class="detail-overview"></p>
+          
+          <div class="detail-actions">
+            <button id="watch-btn" class="watch-btn">
+              <span>WATCH</span>
+            </button>
+            <button id="watchlist-btn" class="watchlist-btn">
+              <i data-lucide="plus"></i>
+            </button>
+          </div>
+        </div>
+
+        <!-- Trailer Section -->
+        <div id="trailer-section" class="trailer-section">
+          <div id="trailer-card" class="trailer-card" role="button" aria-label="Play trailer">
+            <img id="trailer-thumb" alt="Trailer thumbnail" loading="lazy" />
+            <div class="trailer-overlay">
+              <i data-lucide="play"></i>
+              <span>WATCH TRAILER</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Episodes Section (TV only) -->
+        <section id="episodes-section" class="episodes-section" hidden>
+          <div class="season-selector">
+            <select id="season-select" aria-label="Select Season"></select>
+          </div>
+          <div id="episodes-grid" class="episodes-grid"></div>
+        </section>
+      </section>
+
+      <!-- Right section: Cast -->
+      <aside class="detail-right">
+        <div class="cast-section">
+          <div class="cast-header">
+            <h3>Cast</h3>
+            <div class="cast-info">
+              <span id="cast-creator"></span>
+              <span id="cast-stars"></span>
+            </div>
+          </div>
+          <div id="cast-scroller" class="cast-scroller"></div>
+        </div>
+      </aside>
+    </main>
+  </div>
+
+  <!-- Libraries -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/motion@10/dist/motion.min.js"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/supabase.min.js"></script>
+  <script src="supabaseClient.js?v=20250904T141709"></script>
+  <script>
+    (function(){
+      if (!('serviceWorker' in navigator)) return;
+      try {
+        const usp = new URLSearchParams(location.search);
+        const disableSW = usp.has('nosw') || usp.get('sw') === 'off' || usp.get('sw') === '0';
+        if (disableSW) {
+          navigator.serviceWorker.getRegistrations().then(regs => Promise.all(regs.map(r => r.unregister()))).catch(()=>{});
+          return;
+        }
+        const existingVer = localStorage.getItem('sw_v');
+        const verSeed = (window.APP_VERSION || window.__BUILD_ID__ || existingVer || Date.now());
+        if (!existingVer) { try { localStorage.setItem('sw_v', String(verSeed)); } catch(e){} }
+        const swUrl = `/service-worker.js?v=${encodeURIComponent(verSeed)}`;
+        const onLoad = async () => {
+          try {
+            const reg = await navigator.serviceWorker.register(swUrl, { scope: '/' });
+            try { await reg.update(); } catch(e){}
+            try { navigator.serviceWorker.controller?.postMessage({ t: 'ping' }); } catch(e){}
+          } catch (e) { console.warn('SW register (detail) failed', e); }
+        };
+        if (document.readyState === 'complete') onLoad();
+        else window.addEventListener('load', onLoad, { once: true });
+      } catch (_) {}
+    })();
+  </script>
+
+  <!-- Page Script -->
+  <script src="detail.js"></script>
+</body>
+</html>

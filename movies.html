@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Movies – zazzle</title>
+  <link rel="stylesheet" href="styles.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  
+</head>
+<body class="results-page">
+  <nav class="navbar">
+    <div class="nav-container">
+      <div class="nav-left">
+        <div class="logo">
+          <div class="brand-slot">
+            <a href="index.html" class="hbo-logo" id="brand-logo" data-text="zazzle">zazzle</a>
+          </div>
+        </div>
+      </div>
+      <div class="nav-center">
+        <ul class="nav-menu">
+          <li><a href="series.html" class="nav-link nav-link--series">SERIES</a></li>
+          <li><a href="movies.html" class="nav-link nav-link--movies active">MOVIES</a></li>
+          <li><a href="animation.html" class="nav-link nav-link--animation">ANIMATION</a></li>
+        </ul>
+      </div>
+      <div class="nav-right">
+        <button class="hamburger" aria-label="Open menu" aria-controls="mobile-drawer" aria-expanded="false">
+          <span></span><span></span><span></span>
+        </button>
+        <div class="search-container" id="search">
+          <i class="search-icon" data-lucide="search"></i>
+          <span class="search-ghost" id="search-ghost" aria-hidden="true"></span>
+          <input class="search-input" type="text" placeholder="Search movies, series..." aria-label="Search" autocomplete="off" />
+          <div class="search-results-panel" id="search-results" aria-live="polite"></div>
+        </div>
+        <button class="get-hbo-btn">Sign up</button>
+        <button class="sign-in-btn">SIGN IN</button>
+      </div>
+    </div>
+  </nav>
+
+  <div class="drawer-overlay" hidden></div>
+  <aside id="mobile-drawer" class="mobile-drawer" aria-hidden="true">
+    <nav class="drawer-nav" aria-label="Mobile Navigation">
+      <a href="series.html" class="drawer-link">Series</a>
+      <a href="movies.html" class="drawer-link">Movies</a>
+      <a href="animation.html" class="drawer-link">Animation</a>
+    </nav>
+  </aside>
+
+  <main class="results-wrapper">
+    <section class="results-container" aria-live="polite">
+      <div class="results-header">
+        <h1 class="results-title">Movies</h1>
+        <div class="results-sub" id="results-sub">Loading…</div>
+      </div>
+      <div class="results-featured" id="results-featured" role="region" aria-label="Featured"></div>
+      <div class="results-grid" id="results-grid" role="list"></div>
+      <div class="pagination" id="pagination" hidden>
+        <button class="prev-btn" id="prev-btn">Prev</button>
+        <div class="page-info" id="page-info"></div>
+        <button class="next-btn" id="next-btn">Next</button>
+      </div>
+    </section>
+
+    <footer class="site-footer">
+      <div> zazzle. All rights reserved.</div>
+    </footer>
+  </main>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/motion@10/dist/motion.min.js"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/supabase.min.js"></script>
+  <script src="supabaseClient.js?v=20250904T141709"></script>
+  <script src="script.js"></script>
+  <script src="results.js"></script>
+  <script>
+    document.getElementById('year').textContent = new Date().getFullYear();
+  </script>
+</body>
+</html>

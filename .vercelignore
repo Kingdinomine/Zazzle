@@ -1,0 +1,19 @@
+# Exclude local dev-only files and directories from deployment
+server.js
+dev/
+api/hls-proxy.js
+backend/
+
+# Local env and caches
+.env
+.env.local
+supabase/.temp/
+supabase/.cache/
+
+# IDE/editor
+.vscode/
+.idea/
+
+# Backups and archives
+*.zip
+backend-backup-*.zip

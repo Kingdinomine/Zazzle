@@ -1,0 +1,5 @@
+{
+  "lock": false,
+  "compilerOptions": { "lib": ["deno.ns", "dom"] },
+  "tasks": {}
+}

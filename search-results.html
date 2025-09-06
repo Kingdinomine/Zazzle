@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Search Results - zazzle</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="search-results.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Navigation Bar -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-left">
+                <div class="logo">
+                    <div class="brand-slot">
+                        <a class="hbo-logo" id="brand-logo" href="index.html" data-text="zazzle">zazzle</a>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="nav-center">
+                <ul class="nav-menu">
+                    <li><a href="series.html" class="nav-link nav-link--series">SERIES</a></li>
+                    <li><a href="movies.html" class="nav-link nav-link--movies">MOVIES</a></li>
+                    <li><a href="animation.html" class="nav-link nav-link--animation">ANIMATION</a></li>
+                </ul>
+            </div>
+            
+            <div class="nav-right">
+                <button class="hamburger" aria-label="Open menu" aria-controls="mobile-drawer" aria-expanded="false">
+                    <span></span><span></span><span></span>
+                </button>
+                <div class="search-container" id="search">
+                    <i class="search-icon" data-lucide="search"></i>
+                    <span class="search-ghost" id="search-ghost" aria-hidden="true"></span>
+                    <input class="search-input" type="text" placeholder="Search movies, series..." aria-label="Search" autocomplete="off" />
+                </div>
+                <button class="get-hbo-btn">Sign up</button>
+                <button class="sign-in-btn">SIGN IN</button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Mobile Drawer -->
+    <div class="drawer-overlay" hidden></div>
+    <aside id="mobile-drawer" class="mobile-drawer" aria-hidden="true">
+        <nav class="drawer-nav" aria-label="Mobile Navigation">
+            <a href="series.html" class="drawer-link">Series</a>
+            <a href="movies.html" class="drawer-link">Movies</a>
+            <a href="animation.html" class="drawer-link">Animation</a>
+        </nav>
+    </aside>
+
+    <!-- Premium Search Results Interface -->
+    <div class="premium-search-container" id="search-results-container">
+        <div class="search-results-box">
+            <div class="search-header">
+                <div class="search-bar-container">
+                    <input type="text" id="search-results-input" class="search-results-input" placeholder="Search movies, series..." autocomplete="off">
+                    <i class="search-icon" data-lucide="search"></i>
+                </div>
+                <button class="close-search" id="close-search" aria-label="Close search">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                    </svg>
+                </button>
+            </div>
+
+            <!-- Movies Section -->
+            <div class="results-section" id="movies-section">
+                <div class="section-header">
+                    <h3 class="section-title">Movies</h3>
+                    <button class="see-all-btn" id="see-all-movies" data-type="movie">
+                        See All
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polyline points="9,6 15,12 9,18"></polyline>
+                        </svg>
+                    </button>
+                </div>
+                <div class="results-grid" id="movies-grid">
+                    <!-- Movie cards will be populated here -->
+                </div>
+            </div>
+
+            <!-- Series Section -->
+            <div class="results-section" id="series-section">
+                <div class="section-header">
+                    <h3 class="section-title">Series</h3>
+                    <button class="see-all-btn" id="see-all-series" data-type="tv">
+                        See All
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polyline points="9,6 15,12 9,18"></polyline>
+                        </svg>
+                    </button>
+                </div>
+                <div class="results-grid" id="series-grid">
+                    <!-- Series cards will be populated here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script>
+      (function(){
+        if (!('serviceWorker' in navigator)) return;
+        try {
+          const usp = new URLSearchParams(location.search);
+          const disableSW = usp.has('nosw') || usp.get('sw') === 'off' || usp.get('sw') === '0';
+          if (disableSW) {
+            navigator.serviceWorker.getRegistrations().then(regs => Promise.all(regs.map(r => r.unregister()))).catch(()=>{});
+            return;
+          }
+          const existingVer = localStorage.getItem('sw_v');
+          const verSeed = (window.APP_VERSION || window.__BUILD_ID__ || existingVer || Date.now());
+          if (!existingVer) { try { localStorage.setItem('sw_v', String(verSeed)); } catch(e){} }
+          const swUrl = `/service-worker.js?v=${encodeURIComponent(verSeed)}`;
+          const onLoad = async () => {
+            try {
+              const reg = await navigator.serviceWorker.register(swUrl, { scope: '/' });
+              try { await reg.update(); } catch(e){}
+              try { navigator.serviceWorker.controller?.postMessage({ t: 'ping' }); } catch(e){}
+            } catch (e) { console.warn('SW register (search-results) failed', e); }
+          };
+          if (document.readyState === 'complete') onLoad();
+          else window.addEventListener('load', onLoad, { once: true });
+        } catch (_) {}
+      })();
+    </script>
+    <script src="search-results.js"></script>
+  </body>
+</html>
