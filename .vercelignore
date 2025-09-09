@@ -3,6 +3,8 @@ server.js
 dev/
 api/hls-proxy.js
 backend/
+test-proxy.html
+dev-notes.md
 
 # Local env and caches
 .env

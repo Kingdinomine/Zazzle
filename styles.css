@@ -5,6 +5,92 @@
     box-sizing: border-box;
 }
 
+/* Floating Back Button (shared) */
+.back-btn {
+    position: fixed;
+    top: 82px; /* below 70px navbar */
+    left: 16px;
+    z-index: 1100;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px;
+    border-radius: 12px;
+    border: 1px solid rgba(255,255,255,0.22);
+    background: rgba(0,0,0,0.4);
+    color: #fff;
+    cursor: pointer;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+}
+.back-btn:hover { background: rgba(0,0,0,0.55); border-color: rgba(255,255,255,0.3); }
+.back-btn i { width: 18px; height: 18px; }
+.back-btn span { font-weight: 700; font-size: 0.9rem; letter-spacing: .2px; }
+
+/* Shared Episode-Style Card Components (used across pages: continue, favorites, watchlist) */
+.episodes-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 1rem;
+}
+
+.episode-card {
+    position: relative;
+    background: transparent;
+    border-radius: 12px;
+    overflow: hidden;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    aspect-ratio: 3/2; /* cinematic tile */
+}
+
+.episode-card:hover { transform: translateY(-4px) scale(1.02); }
+
+.episode-thumb {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    border-radius: 12px;
+    background: rgba(255,255,255,0.06);
+}
+
+.episode-meta {
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    background: linear-gradient(transparent, rgba(0, 0, 0, 0.8));
+    padding: 1.25rem 1rem 0.9rem 1rem;
+    border-radius: 0 0 12px 12px;
+}
+
+.episode-title {
+    font-weight: 700;
+    font-size: 1rem;
+    margin-bottom: 0.35rem;
+    color: #fff;
+    text-shadow: 0 1px 3px rgba(0,0,0,0.8);
+}
+
+/* Continue Watching section */
+.continue-section { 
+    max-width: 1400px; margin: 2rem auto; padding: 0 2rem; 
+    display: none !important; /* temporarily remove Continue Watching */
+}
+.continue-title { font-size: 1.25rem; font-weight: 800; margin-bottom: 0.75rem; }
+.continue-row { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1rem; }
+.continue-empty { grid-column: 1/-1; padding: 16px; border: 1px dashed rgba(255,255,255,0.2); border-radius: 10px; opacity: .8; }
+
+/* Greeting above hero title */
+.user-greeting {
+    color: #ff6b6b;
+    font-weight: 900;
+    margin-bottom: 8px;
+    font-size: clamp(1.1rem, 2.5vw, 1.6rem); /* increase greeting size */
+}
+.continue-card { display: block; text-decoration: none; color: inherit; }
+.continue-progress { position: absolute; left: 10px; right: 10px; bottom: 10px; height: 6px; background: rgba(255,255,255,0.25); border-radius: 4px; overflow: hidden; }
+.continue-progress > span { display: block; height: 100%; background: linear-gradient(90deg, #22c55e, #84cc16); }
+
 body {
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     background: #000;
@@ -487,8 +573,8 @@ body {
 }
 
 .hero-title {
-    /* Reduced title size per request */
-    font-size: clamp(1.8rem, 4.5vw, 3rem);
+    /* Further reduced title size per request */
+    font-size: clamp(1.6rem, 4.2vw, 2.8rem);
     font-weight: 900;
     line-height: 0.9;
     margin-bottom: 1.5rem;
@@ -662,7 +748,7 @@ body {
 
 .carousel-card .card-title {
     font-weight: 700;
-    font-size: clamp(0.95rem, 1.2vw, 1.15rem);
+    font-size: clamp(0.9rem, 1.1vw, 1.05rem);
     line-height: 1.25;
 }
 
@@ -737,17 +823,6 @@ body {
 }
 
 /* Search Overlay - positioned below navbar */
-
-
-
-
-
-
-
-
-
-
-
 
 
 /* Responsive design for two-panel layout */
@@ -1727,14 +1802,9 @@ body.results-page::before {
     }
 
     /* Vertical carousel on small screens */
-    .carousel {
-        width: 100%;
-        justify-content: center;
-    }
-    .carousel-track { flex-direction: row; gap: 0.8rem; }
-    .carousel-card {
-        width: min(70vw, 360px);
-    }
+    .carousel { width: 100%; justify-content: center; }
+    .carousel-track { flex-direction: row; gap: 0.7rem; }
+    .carousel-card { width: min(60vw, 280px); }
     .carousel-card.is-second { transform: scale(0.9); opacity: 0; visibility: hidden; pointer-events: none; }
     .carousel-card.is-third { transform: scale(0.9); opacity: 0; visibility: hidden; pointer-events: none; }
     .carousel-card.is-rest { transform: scale(0.9); opacity: 0; visibility: hidden; pointer-events: none; }

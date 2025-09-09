@@ -5,8 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>zazzle- Free movies & series</title>
     <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="auth.css">
     <link rel="stylesheet" href="search-results.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="icon" href="favicon.ico" type="image/x-icon">
     
 </head>
 <body>
@@ -132,6 +134,9 @@
             </div>
             
             <div class="hero-text" aria-live="polite">
+                <div id="user-greeting" class="user-greeting" hidden>
+                    Hi, <span id="user-greeting-name"></span>
+                </div>
                 <h1 class="hero-title"></h1>
                 <p class="hero-description"></p>
                 <button class="watch-trailer-btn" style="display: none;">
@@ -145,6 +150,12 @@
                 <div class="carousel-track" role="list"></div>
             </div>
         </div>
+    </section>
+
+    <!-- Continue Watching (signed-in only) -->
+    <section id="continue-section" class="continue-section" hidden>
+        <h3 class="continue-title">Continue Watching</h3>
+        <div id="continue-row" class="continue-row" role="list"></div>
     </section>
 
     <!-- Content Navigation -->
@@ -169,8 +180,9 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/motion@10/dist/motion.min.js"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/supabase.min.js"></script>
+    <!-- Supabase SDK is auto-loaded by supabaseClient.js (UMD with CDN fallback) -->
     <script src="supabaseClient.js?v=20250904T141709"></script>
+    <script src="auth-ui.js"></script>
     <script src="search-results.js"></script>
     <script src="script.js"></script>
 </body>

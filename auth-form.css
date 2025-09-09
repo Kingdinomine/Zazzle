@@ -1,0 +1,20 @@
+/* Auth Form Design */
+::selection { background-color: gray; }
+
+.container { margin: 0 auto; display: flex; justify-content: center; align-items: center; min-height: 100vh; background: #0a0a0b; }
+
+.form { width: 400px; height: 400px; background-image: linear-gradient(to bottom, #424242, #212121); display: flex; align-items: center; flex-direction: column; border-radius: 0.5rem; box-shadow: 0 10px 30px rgba(0,0,0,0.35); border: 1px solid rgba(255,255,255,0.12); }
+
+.title { color: wheat; margin: 3rem 0 1.5rem; font-size: 2rem; font-weight: 800; font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, "Helvetica Neue", "Noto Sans", sans-serif; }
+
+.input { margin: 0.5rem 0; padding: 1rem 0.5rem; width: 20rem; background-color: inherit; color: wheat; border: none; outline: none; border-bottom: 1px solid wheat; transition: all 400ms; font-size: 1rem; border-radius: 0; }
+.input:hover { background-color: #424242; border: none; border-radius: 0.5rem; }
+
+.btn { height: 3rem; width: 20rem; margin-top: 2rem; background-color: wheat; border-radius: 0.5rem; border: none; font-size: 1.1rem; font-weight: 700; transition: all 400ms; cursor: pointer; box-shadow: 0 0 10px antiquewhite, 0 0 10px antiquewhite; }
+.btn:hover { background-color: antiquewhite; box-shadow: none; }
+
+/* helper */
+.auth-note { color: #e7dec5; margin-top: 10px; opacity: .9; font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, "Helvetica Neue", "Noto Sans", sans-serif; }
+.auth-links-row { display: flex; gap: 16px; margin-top: 10px; }
+.auth-links-row a { color: wheat; text-decoration: underline; }
+#auth-msg { color: #ffd; margin-top: 10px; min-height: 1.2em; font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial, "Helvetica Neue", "Noto Sans", sans-serif; }

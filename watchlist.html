@@ -3,12 +3,13 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Series – zazzle</title>
+  <title>Watchlist • zazzle</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="styles.css" />
   <link rel="stylesheet" href="auth.css" />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
   <link rel="icon" href="favicon.ico" type="image/x-icon">
-  
 </head>
 <body class="results-page">
   <nav class="navbar">
@@ -22,7 +23,7 @@
       </div>
       <div class="nav-center">
         <ul class="nav-menu">
-          <li><a href="series.html" class="nav-link nav-link--series active">SERIES</a></li>
+          <li><a href="series.html" class="nav-link nav-link--series">SERIES</a></li>
           <li><a href="movies.html" class="nav-link nav-link--movies">MOVIES</a></li>
           <li><a href="animation.html" class="nav-link nav-link--animation">ANIMATION</a></li>
         </ul>
@@ -55,16 +56,10 @@
   <main class="results-wrapper">
     <section class="results-container" aria-live="polite">
       <div class="results-header">
-        <h1 class="results-title">Series</h1>
+        <h1 class="results-title">Watchlist</h1>
         <div class="results-sub" id="results-sub">Loading…</div>
       </div>
-      <div class="results-featured" id="results-featured" role="region" aria-label="Featured"></div>
-      <div class="results-grid" id="results-grid" role="list"></div>
-      <div class="pagination" id="pagination" hidden>
-        <button class="prev-btn" id="prev-btn">Prev</button>
-        <div class="page-info" id="page-info"></div>
-        <button class="next-btn" id="next-btn">Next</button>
-      </div>
+      <div class="episodes-grid" id="wl-grid" role="list"></div>
     </section>
 
     <footer class="site-footer">
@@ -72,17 +67,11 @@
     </footer>
   </main>
 
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/motion@10/dist/motion.min.js"></script>
   <script src="https://unpkg.com/lucide@latest"></script>
   <!-- Supabase SDK auto-loaded by supabaseClient.js (UMD with fallback) -->
   <script src="supabaseClient.js?v=20250904T141709"></script>
   <script src="auth-ui.js"></script>
   <script src="script.js"></script>
-  <script src="results.js"></script>
-  <script>
-    document.getElementById('year').textContent = new Date().getFullYear();
-  </script>
+  <script src="watchlist.js"></script>
 </body>
 </html>

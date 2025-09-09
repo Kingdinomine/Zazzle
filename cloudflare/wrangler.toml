@@ -1,0 +1,8 @@
+name = "zazzle-hls-proxy"
+main = "worker.js"
+compatibility_date = "2025-09-07"
+
+# Deploys to <name>.<your-subdomain>.workers.dev by default
+# Run:  wrangler deploy
+# If you have a custom domain, you can add routes like:
+# routes = [ { pattern = "https://hls.yourdomain.com/*", zone_name = "yourdomain.com" } ]

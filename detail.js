@@ -12,6 +12,7 @@
   const castStars = qs('#cast-stars');
   const watchBtn = qs('#watch-btn');
   const watchlistBtn = qs('#watchlist-btn');
+  const favoritesBtn = qs('#favorites-btn');
   const trailerSection = qs('#trailer-section');
   const trailerCard = qs('#trailer-card');
   const trailerThumb = qs('#trailer-thumb');
@@ -24,16 +25,24 @@
   const TMDB_IMG = 'https://image.tmdb.org/t/p/';
   const TMDB_API_KEY = '668153cb301606fdc86fef072e7daf06'; // fallback only
 
+  // Image helpers: convert TMDB paths or absolute URLs to high-quality PNG via images.weserv
+  function pngify(url) {
+    if (!url) return '';
+    try { const clean = String(url).replace(/^https?:\/\//, ''); return `https://images.weserv.nl/?url=${encodeURIComponent(clean)}&output=png`; } catch { return url; }
+  }
+  function tmdbImg(path, size = 'w780') {
+    if (!path) return '';
+    if (/^https?:/i.test(path)) return pngify(path);
+    return pngify(`${TMDB_IMG}${size}${path}`);
+  }
+
   async function tmdb(path, query = {}) {
     const tryProxy = async (p) => {
       try {
         if (!window.SUPABASE?.tmdbProxy) return null;
         const { data, error } = await window.SUPABASE.tmdbProxy.call(p, query);
         // If Edge Function returns a TMDB error payload, treat it as failure so we can fallback
-        if (error || !data || data.success === false || typeof data.status_code === 'number') {
-          console.warn('TMDB proxy returned error payload, falling back to direct:', { p, error, data });
-          return null;
-        }
+        if (error || !data || data.success === false || typeof data.status_code === 'number') { return null; }
         return data;
       } catch (_) { return null; }
     };
@@ -54,9 +63,7 @@
     }
 
     // Debug logging for series issues
-    if (String(path).includes('/tv/') && data && data.success === false) {
-      console.error('TMDB API Error for TV series:', data);
-    }
+    if (String(path).includes('/tv/') && data && data.success === false) { /* no console in prod */ }
     return data;
   }
 
@@ -66,8 +73,6 @@
   const typeParam = (params.get('type') || 'movie').toLowerCase();
   const type = (typeParam === 'tv' || typeParam === 'series') ? 'tv' : 'movie';
   
-  console.log('Detail page params:', { id, type, typeParam });
-
   if (!(id > 0)) {
     renderNotFound();
     return;
@@ -80,6 +85,16 @@
 
   // Page init
   initNavMinimal();
+  // Back button
+  (function initBackBtn(){
+    const backBtn = document.getElementById('back-btn');
+    backBtn?.addEventListener('click', () => {
+      try {
+        if (document.referrer && document.referrer !== location.href) history.back();
+        else location.href = 'index.html';
+      } catch(_) { location.href = 'index.html'; }
+    });
+  })();
   loadDetail().then(() => initAnimations());
 
   // ----- Rendering -----
@@ -91,11 +106,7 @@
         tmdb(`/${type}/${id}/videos`)
       ]);
 
-      if (!details || details.success === false || details.status_code === 34) {
-        console.error('Failed to load details:', details);
-        renderNotFound();
-        return;
-      }
+      if (!details || details.success === false || details.status_code === 34) { renderNotFound(); return; }
 
       const title = details.title || details.name || 'Untitled';
       const overview = details.overview || '';
@@ -142,8 +153,9 @@
         }
       });
 
-      // Watchlist
+      // Watchlist & Favorites
       setupWatchlist(watchlistBtn, details, type);
+      setupFavorites(favoritesBtn, details, type);
 
       // Episodes (TV)
       if (type === 'tv') {
@@ -158,10 +170,7 @@
 
       // Icons
       try { if (window.lucide?.createIcons) window.lucide.createIcons(); } catch (_) {}
-    } catch (e) {
-      console.error('Error loading detail:', e);
-      renderNotFound();
-    }
+    } catch (_) { renderNotFound(); }
   }
 
   function buildMeta(details, type) {
@@ -264,7 +273,7 @@
         return; 
       }
       episodesGrid.innerHTML = eps.map(e => {
-        const still = e.still_path ? `${TMDB_IMG}w300${e.still_path}` : '';
+        const still = e.still_path ? tmdbImg(e.still_path, 'w780') : '';
         const title = escapeHTML(`${e.episode_number ? 'E' + e.episode_number + ' — ' : ''}${e.name || ''}`);
         const air = (e.air_date || '').slice(0, 10);
         return `
@@ -340,10 +349,61 @@
     try { if (window.lucide?.createIcons) window.lucide.createIcons(); } catch (_) {}
   }
 
+  // ----- Favorites -----
+  async function setupFavorites(btn, details, type) {
+    if (!btn || !window.SUPABASE) return;
+
+    let added = false;
+    try {
+      const { user } = await window.SUPABASE.auth.getUser();
+      if (user) {
+        const { data } = await window.SUPABASE.favorites.list();
+        added = Array.isArray(data) && data.some(r => r && r.tmdb_id === id && r.media_type === type);
+      }
+    } catch (_) {}
+
+    setFavoritesBtnState(btn, added);
+
+    btn.addEventListener('click', async () => {
+      try {
+        const payload = {
+          tmdb_id: id,
+          media_type: type,
+          title: details.title || details.name || '',
+          poster_path: details.poster_path || null,
+          backdrop_path: details.backdrop_path || null,
+          overview: details.overview || null,
+          popularity: details.popularity || null,
+        };
+        if (!added) {
+          const { error } = await window.SUPABASE.favorites.save(payload);
+          if (error) throw error;
+          added = true;
+          setFavoritesBtnState(btn, true);
+        } else {
+          const { error } = await window.SUPABASE.favorites.remove({ tmdb_id: id, media_type: type });
+          if (error) throw error;
+          added = false;
+          setFavoritesBtnState(btn, false);
+        }
+      } catch (e) {
+        showToast('Please sign in to use favorites');
+      }
+    });
+  }
+
+  function setFavoritesBtnState(btn, added) {
+    btn.classList.toggle('is-added', !!added);
+    const icon = btn.querySelector('i');
+    if (icon) icon.setAttribute('data-lucide', added ? 'check' : 'heart');
+    try { if (window.lucide?.createIcons) window.lucide.createIcons(); } catch (_) {}
+  }
+
   // ----- Trailer Overlay -----
   function openTrailer(key) {
     if (!key || !trailerOverlay || !trailerFrame) return;
-    const src = `https://www.youtube.com/embed/${key}?autoplay=1&rel=0`;
+    const origin = (location && location.origin) ? encodeURIComponent(location.origin) : '';
+    const src = `https://www.youtube.com/embed/${key}?autoplay=1&playsinline=1&modestbranding=1&rel=0&enablejsapi=1${origin ? `&origin=${origin}` : ''}`;
     trailerOverlay.setAttribute('aria-hidden', 'false');
     trailerOverlay.classList.add('active');
     trailerFrame.src = src;

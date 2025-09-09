@@ -117,7 +117,7 @@ ALTER TABLE public.search_history ENABLE ROW LEVEL SECURITY;
 
 -- 8) Grants (privileges) — use RLS to restrict rows; only authenticated users may write
 GRANT USAGE ON SCHEMA public TO anon, authenticated;
-GRANT SELECT ON public.profiles TO authenticated;
+GRANT SELECT, INSERT, UPDATE, DELETE ON public.profiles TO authenticated;
 GRANT SELECT, INSERT, UPDATE, DELETE ON public.favorites TO authenticated;
 GRANT SELECT, INSERT, UPDATE, DELETE ON public.watchlist TO authenticated;
 GRANT SELECT, INSERT, UPDATE, DELETE ON public.ratings TO authenticated;
@@ -256,6 +256,42 @@ CREATE POLICY "Search results can be inserted by owner"
 DROP POLICY IF EXISTS "Search results can be deleted by owner" ON public.search_results;
 CREATE POLICY "Search results can be deleted by owner"
   ON public.search_results FOR DELETE
-  USING (auth. uid() = user_id);
+  USING (auth.uid() = user_id);
 
 GRANT SELECT, INSERT, UPDATE, DELETE ON public.search_results TO authenticated;
+
+-- 11) Continue Watching / Watch Progress
+CREATE TABLE IF NOT EXISTS public.watch_progress (
+  id BIGSERIAL PRIMARY KEY,
+  user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+  tmdb_id BIGINT NOT NULL,
+  media_type public.media_type NOT NULL,
+  season INT,
+  episode INT,
+  title TEXT,
+  poster_path TEXT,
+  backdrop_path TEXT,
+  progress_seconds INT NOT NULL DEFAULT 0,
+  duration_seconds INT NOT NULL DEFAULT 0,
+  last_watched_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  UNIQUE(user_id, tmdb_id, media_type, COALESCE(season,0), COALESCE(episode,0))
+);
+ALTER TABLE public.watch_progress ENABLE ROW LEVEL SECURITY;
+GRANT SELECT, INSERT, UPDATE, DELETE ON public.watch_progress TO authenticated;
+
+DROP POLICY IF EXISTS "Watch progress viewable by owner" ON public.watch_progress;
+CREATE POLICY "Watch progress viewable by owner"
+  ON public.watch_progress FOR SELECT
+  USING (auth.uid() = user_id);
+
+DROP POLICY IF EXISTS "Watch progress upsert by owner" ON public.watch_progress;
+CREATE POLICY "Watch progress upsert by owner"
+  ON public.watch_progress FOR INSERT
+  WITH CHECK (auth.uid() = user_id);
+
+DROP POLICY IF EXISTS "Watch progress update by owner" ON public.watch_progress;
+CREATE POLICY "Watch progress update by owner"
+  ON public.watch_progress FOR UPDATE
+  USING (auth.uid() = user_id)
+  WITH CHECK (auth.uid() = user_id);
+

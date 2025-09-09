@@ -1,10 +1,41 @@
 // GSAP Animation Setup
 gsap.registerPlugin(ScrollTrigger);
+// Silence warnings when selectors don't exist on a given page
+try { if (gsap && gsap.config) gsap.config({ nullTargetWarn: false }); } catch(_) {}
+
+// Greeting for signed-in users
+async function showUserGreeting() {
+    try {
+        if (!window.SUPABASE) return;
+        await window.SUPABASE.ready();
+        const { user } = await window.SUPABASE.auth.getUser();
+        if (!user) return;
+        const holder = document.getElementById('user-greeting');
+        const nameEl = document.getElementById('user-greeting-name');
+        if (!holder || !nameEl) return;
+        let display = '';
+        try { const { data } = await window.SUPABASE.profiles.get(); display = data?.username || data?.full_name || ''; } catch(_) {}
+        if (!display) display = (user.user_metadata && (user.user_metadata.full_name || user.user_metadata.name)) || '';
+        if (!display) display = (user.email || '').split('@')[0] || 'there';
+        nameEl.textContent = display;
+        holder.hidden = false;
+    } catch(_) {}
+}
 
 // TMDB configuration
 const TMDB_API_KEY = '668153cb301606fdc86fef072e7daf06';
 const TMDB_BASE = 'https://api.themoviedb.org/3';
 const TMDB_IMG = 'https://image.tmdb.org/t/p/';
+// Force PNG everywhere via a fast image proxy
+function pngify(url) {
+    if (!url) return '';
+    try { const clean = String(url).replace(/^https?:\/\//, ''); return `https://images.weserv.nl/?url=${encodeURIComponent(clean)}&output=png`; } catch { return url; }
+}
+function tmdbImg(path, size = 'w780') {
+    if (!path) return '';
+    if (/^https?:/i.test(path)) return pngify(path);
+    return pngify(`${TMDB_IMG}${size}${path}`);
+}
 // Backend API base: same-origin (empty) so it works on Vercel and local dev
 let API_BASE = '';
 try {
@@ -15,6 +46,58 @@ try {
         }
     }
 } catch (_) {}
+
+// ----- Continue Watching -----
+async function loadContinueWatching() {
+    try {
+        if (!window.SUPABASE) return;
+        try { await window.SUPABASE.ready(); } catch (_) {}
+        const { user } = await window.SUPABASE.auth.getUser();
+        if (!user) return;
+        const sec = document.getElementById('continue-section');
+        const row = document.getElementById('continue-row');
+        if (!sec || !row) return;
+        const { data, error } = await window.SUPABASE.watchProgress.listRecent(12);
+        if (error) { return; }
+        // Render items if available, otherwise show a friendly placeholder
+        const items = Array.isArray(data) ? data : [];
+        row.innerHTML = items.map(item => {
+            const poster = item.poster_path || item.backdrop_path || '';
+            const img = tmdbImg(poster, 'w780');
+            const title = (item.title || '').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+            const sub = item.media_type === 'tv' && (item.season || item.episode) ? `S${item.season||1} • E${item.episode||1}` : (item.media_type || '').toUpperCase();
+            const pct = (Number(item.duration_seconds) > 0) ? Math.max(0, Math.min(100, Math.round((Number(item.progress_seconds)||0) * 100 / Number(item.duration_seconds)))) : 0;
+            const href = item.media_type === 'tv'
+                ? `watch.html?type=tv&id=${item.tmdb_id}&season=${item.season||1}&episode=${item.episode||1}`
+                : `watch.html?type=movie&id=${item.tmdb_id}`;
+            return `
+              <article class="episode-card" role="listitem">
+                <a href="${href}" aria-label="Resume ${title}">
+                  ${img ? `<img class="episode-thumb" loading="lazy" src="${img}" alt="${title}">` : `<div class="episode-thumb" style="background:rgba(255,255,255,.06)" aria-hidden="true"></div>`}
+                </a>
+                <div class="episode-meta">
+                  <div class="episode-title">${title}</div>
+                  <div>${sub}</div>
+                  <div class="continue-progress"><span style="width:${pct}%"></span></div>
+                </div>
+              </article>`;
+        }).join('');
+        if (!items.length) {
+            row.innerHTML = '<div class="continue-empty">Start watching a movie or an episode — your progress will show up here.</div>';
+        }
+        sec.hidden = false;
+    } catch (e) {
+        // silent fail
+    }
+}
+
+// Lightweight fetch timeout helper
+function fetchWithTimeout(resource, options = {}, timeout = 8000) {
+    const controller = new AbortController();
+    const id = setTimeout(() => controller.abort(), timeout);
+    return fetch(resource, { ...options, signal: controller.signal })
+        .finally(() => clearTimeout(id));
+}
 
 // Carousel state
 const CAROUSEL = {
@@ -45,10 +128,10 @@ const ANIM = {
        const existingVer = localStorage.getItem('sw_v');
        const verSeed = (window.APP_VERSION || window.__BUILD_ID__ || existingVer || Date.now());
        if (!existingVer) { try { localStorage.setItem('sw_v', String(verSeed)); } catch {} }
-       const swUrl = `/service-worker.js?v=${encodeURIComponent(verSeed)}`;
+       const swUrl = `service-worker.js?v=${encodeURIComponent(verSeed)}`;
        const onLoad = async () => {
            try {
-               const reg = await navigator.serviceWorker.register(swUrl, { scope: '/' });
+               const reg = await navigator.serviceWorker.register(swUrl);
                try { await reg.update(); } catch {}
                if (!navigator.serviceWorker.controller) {
                    await Promise.race([
@@ -57,7 +140,7 @@ const ANIM = {
                    ]);
                }
                try { navigator.serviceWorker.controller?.postMessage({ t: 'ping' }); } catch {}
-           } catch (e) { console.warn('SW register (global) failed', e); }
+           } catch (_) { /* silent in production */ }
        };
        if (document.readyState === 'complete') onLoad();
        else window.addEventListener('load', onLoad, { once: true });
@@ -70,70 +153,89 @@ document.addEventListener('DOMContentLoaded', function() {
     initializeSearchElements();
     // Initialize premium search interface
     initializePremiumSearch();
-    // Hero title solar flare sweep animation
-    gsap.set('.hero-title', { opacity: 0, y: 100 });
-    gsap.set('.hero-description', { opacity: 0, y: 50 });
-    gsap.set('.watch-trailer-btn', { opacity: 0, scale: 0.8 });
-    gsap.set('.schedule-tag', { opacity: 0, x: -50 });
-    gsap.set('.carousel-card', { opacity: 0, y: 50 });
-    gsap.set('.nav-arrow', { opacity: 0, scale: 0.8 });
 
-    // Solar flare sweep effect on title
-    const tl = gsap.timeline();
-    
-    tl.to('.hero-title', {
-        duration: 1.5,
-        opacity: 1,
-        y: 0,
-        ease: 'power3.out',
-        onStart: function() {
-                         // Add subtle glow effect
-             const title = document.querySelector('.hero-title');
-             title.style.textShadow = '0 0 20px rgba(255, 255, 255, 0.3)';
-        }
-    })
-    .to('.schedule-tag', {
-        duration: 1,
-        opacity: 1,
-        x: 0,
-        ease: 'power2.out'
-    }, '-=1')
-    .to('.nav-arrow', {
-        duration: 0.6,
-        opacity: 1,
-        scale: 1,
-        stagger: 0.1,
-        ease: 'back.out(1.7)'
-    }, '-=0.2')
-    .to('.carousel-card', {
-        duration: 0.8,
-        opacity: 1,
-        y: 0,
-        stagger: 0.2,
-        ease: 'power2.out'
-    }, '-=0.4');
+    // Run hero/carousel only if hero exists on the page
+    const hasHero = !!document.querySelector('.hero-banner');
+    if (hasHero) {
+        // Hero title solar flare sweep animation
+        gsap.set('.hero-title', { opacity: 0, y: 100 });
+        gsap.set('.hero-description', { opacity: 0, y: 50 });
+        gsap.set('.watch-trailer-btn', { opacity: 0, scale: 0.8 });
+        gsap.set('.schedule-tag', { opacity: 0, x: -50 });
+        gsap.set('.carousel-card', { opacity: 0, y: 50 });
+        gsap.set('.nav-arrow', { opacity: 0, scale: 0.8 });
 
-    // Motion One entrances for description and CTA
-    try {
-        const M = window.Motion;
-        if (M && M.animate) {
-            M.animate('.hero-description', { opacity: [0, 1], transform: ['translateY(24px)', 'translateY(0px)'] }, { duration: 0.9, delay: 0.5, easing: 'cubic-bezier(.22,.61,.36,1)' });
-            M.animate('.watch-trailer-btn', { opacity: [0, 1], transform: ['scale(0.92)', 'scale(1)'] }, { duration: 0.6, delay: 0.8, easing: 'cubic-bezier(.22,.61,.36,1)' });
-        }
-    } catch (_) {}
-    
-    // Populate hero from TMDB
-    loadHeroFromTMDB();
+        // Solar flare sweep effect on title
+        const tl = gsap.timeline();
+        tl.to('.hero-title', {
+            duration: 1.5,
+            opacity: 1,
+            y: 0,
+            ease: 'power3.out',
+            onStart: function() {
+                const title = document.querySelector('.hero-title');
+                if (title) title.style.textShadow = '0 0 20px rgba(255, 255, 255, 0.3)';
+            }
+        })
+        .to('.nav-arrow', {
+            duration: 0.6,
+            opacity: 1,
+            scale: 1,
+            stagger: 0.1,
+            ease: 'back.out(1.7)'
+        }, '-=0.2')
+        .to('.carousel-card', {
+            duration: 0.8,
+            opacity: 1,
+            y: 0,
+            stagger: 0.2,
+            ease: 'power2.out'
+        }, '-=0.4');
 
-    // Enforce full-viewport hero height across browsers
-    enforceFullViewportHero();
-    window.addEventListener('resize', enforceFullViewportHero);
+        // Motion One entrances for description and CTA
+        try {
+            const M = window.Motion;
+            if (M && M.animate) {
+                M.animate('.hero-description', { opacity: [0, 1], transform: ['translateY(24px)', 'translateY(0px)'] }, { duration: 0.9, delay: 0.5, easing: 'cubic-bezier(.22,.61,.36,1)' });
+                M.animate('.watch-trailer-btn', { opacity: [0, 1], transform: ['scale(0.92)', 'scale(1)'] }, { duration: 0.6, delay: 0.8, easing: 'cubic-bezier(.22,.61,.36,1)' });
+            }
+        } catch (_) {}
+
+        // Populate hero from TMDB
+        loadHeroFromTMDB();
+
+        // Enforce full-viewport hero height across browsers
+        enforceFullViewportHero();
+        window.addEventListener('resize', enforceFullViewportHero);
+    }
 
     // Start brand typewriter effect
     typewriterBrand();
 
+    // Greeting for signed-in users
+    showUserGreeting();
+
     // Initialize Lucide icons
     try { if (window.lucide && typeof window.lucide.createIcons === 'function') window.lucide.createIcons(); } catch (_) {}
+
+    // Remove schedule tag if present and any stray 'Stop selecting' toasts
+    try {
+        const sched = document.querySelector('.schedule-tag');
+        if (sched) sched.remove();
+        Array.from(document.querySelectorAll('span')).forEach((el) => {
+            if (String(el.textContent || '').trim().toLowerCase() === 'stop selecting') {
+                const host = el.closest('div,section,aside') || el;
+                host.remove();
+            }
+        });
+    } catch (_) {}
+
+    // Continue Watching temporarily disabled
+});
+
+// Refresh greeting and continue watching when auth changes
+document.addEventListener('auth:change', () => {
+    try { showUserGreeting(); } catch(_) {}
 });
 
 // Re-center on resize to keep the focused card centered with no scrollbar
@@ -266,9 +368,8 @@ function updateHeroFromItem(item) {
     const backdrop = item.backdrop_path;
 
     if (img && backdrop) {
-        img.src = `${TMDB_IMG}w1280${backdrop}`;
-        img.srcset = `${TMDB_IMG}w780${backdrop} 780w, ${TMDB_IMG}w1280${backdrop} 1280w, ${TMDB_IMG}original${backdrop} 1920w`;
-        img.sizes = '100vw';
+        img.src = tmdbImg(backdrop, 'w1280');
+        try { img.removeAttribute('srcset'); img.removeAttribute('sizes'); } catch(_) {}
         img.alt = `${title} backdrop`;
     }
     if (titleEl) titleEl.textContent = title;
@@ -471,10 +572,7 @@ async function loadHeroFromTMDB() {
         updateHeroFromItem(CAROUSEL.data[0]);
 
         loader.remove();
-    } catch (e) {
-        // fail silently for now
-        console.error('TMDB fetch failed', e);
-    }
+    } catch (_) { /* silent */ }
 }
 
 // Ensure hero image fills and remains fixed (no parallax shifting)
@@ -553,12 +651,7 @@ function initializeSearchElements() {
     // Align with premium overlay container from search-results.html
     searchOverlay = document.getElementById('search-results-container');
     
-    console.log('Search elements initialized:', {
-        searchContainer: !!searchContainer,
-        searchIcon: !!searchIcon,
-        searchInput: !!searchInput,
-        searchOverlay: !!searchOverlay
-    });
+    // production: no console logs
     
     // Initialize overlay elements too
     initializeOverlayElements();
@@ -720,14 +813,18 @@ async function internalOverlaySearch(q) {
                 // Removed current tracking - using grid layout instead
                 updateOverlayContent(query, movies, series);
                 
-                // Store all search results in backend with type column
-                if (query.trim() && window.SUPABASE?.searchResults) {
+                // Store/log search results (per-user if signed-in; anonymous log otherwise)
+                if (query.trim() && window.SUPABASE) {
                     try {
+                        await window.SUPABASE.ready();
                         const allResults = [...movies, ...series];
-                        await window.SUPABASE.searchResults.store(query, allResults);
-                    } catch (error) {
-                        console.log('Could not store search results:', error);
-                    }
+                        const { user } = await window.SUPABASE.auth.getUser();
+                        if (user) {
+                            await window.SUPABASE.searchResults.store(query, allResults);
+                        } else {
+                            await window.SUPABASE.logs?.search?.({ query, results: allResults });
+                        }
+                    } catch (_) {}
                 }
                 
                 // Record search in history if user is signed in
@@ -746,12 +843,13 @@ async function internalOverlaySearch(q) {
 
 async function searchWithTMDB(query) {
     try {
-        const [movieResp, seriesResp] = await Promise.all([
-            fetch(`https://api.themoviedb.org/3/search/movie?api_key=${TMDB_API_KEY}&query=${encodeURIComponent(query)}`),
-            fetch(`https://api.themoviedb.org/3/search/tv?api_key=${TMDB_API_KEY}&query=${encodeURIComponent(query)}`)
+        const timeoutMs = 8000;
+        const [movieResp, seriesResp] = await Promise.allSettled([
+            fetchWithTimeout(`https://api.themoviedb.org/3/search/movie?api_key=${TMDB_API_KEY}&query=${encodeURIComponent(query)}`, {}, timeoutMs),
+            fetchWithTimeout(`https://api.themoviedb.org/3/search/tv?api_key=${TMDB_API_KEY}&query=${encodeURIComponent(query)}`, {}, timeoutMs)
         ]);
-        
-        const [movieData, seriesData] = await Promise.all([movieResp.json(), seriesResp.json()]);
+        const movieData = movieResp.status === 'fulfilled' ? await movieResp.value.json() : { results: [] };
+        const seriesData = seriesResp.status === 'fulfilled' ? await seriesResp.value.json() : { results: [] };
         const movies = movieData.results || [];
         const series = seriesData.results || [];
         
@@ -761,14 +859,18 @@ async function searchWithTMDB(query) {
         // Removed current tracking - using grid layout instead
         updateOverlayContent(query, movies, series);
         
-        // Store all search results in backend with type column
-        if (query.trim() && window.SUPABASE?.searchResults) {
+        // Store/log search results (per-user if signed-in; anonymous log otherwise)
+        if (query.trim() && window.SUPABASE) {
             try {
+                await window.SUPABASE.ready();
                 const allResults = [...movies, ...series];
-                await window.SUPABASE.searchResults.store(query, allResults);
-            } catch (error) {
-                console.log('Could not store search results:', error);
-            }
+                const { user } = await window.SUPABASE.auth.getUser();
+                if (user) {
+                    await window.SUPABASE.searchResults.store(query, allResults);
+                } else {
+                    await window.SUPABASE.logs?.search?.({ query, results: allResults });
+                }
+            } catch (_) {}
         }
         
         // Record search in history if user is signed in
@@ -845,7 +947,7 @@ function updatePreview(item) {
     if (previewSub) previewSub.textContent = sub;
     if (previewOverview) previewOverview.textContent = clampText(item.overview || '', 260);
     if (previewPoster) {
-        const nextSrc = item.backdrop_path ? `${TMDB_IMG}w780${item.backdrop_path}` : (item.poster_path ? `${TMDB_IMG}w500${item.poster_path}` : '');
+        const nextSrc = item.backdrop_path ? tmdbImg(item.backdrop_path, 'w780') : (item.poster_path ? tmdbImg(item.poster_path, 'w500') : '');
         if (nextSrc) {
             const img = new Image();
             img.onload = () => {
@@ -890,10 +992,7 @@ function renderOverlayCarousel() {
                 <div class="overlay-card-rating">★ ${rating}</div>
             </div>`;
         // Simple click handler for grid layout
-        card.addEventListener('click', () => {
-            console.log('Card clicked:', title);
-            // Add any click functionality here
-        });
+        card.addEventListener('click', () => { /* reserved */ });
         overlayTrack.appendChild(card);
     });
     // Removed carousel-specific calls - using grid layout instead
@@ -1128,7 +1227,7 @@ function createSimplePagination(currentPage, totalPages) {
 function createCompactCard(item, type) {
     const title = item.title || item.name || 'Untitled';
     const year = (item.release_date || item.first_air_date || '').slice(0, 4);
-    const poster = item.poster_path ? `${TMDB_IMG}w342${item.poster_path}` : '';
+    const poster = item.poster_path ? tmdbImg(item.poster_path, 'w780') : '';
     
     return `
         <div class="compact-card" data-id="${item.id}" data-type="${type}">
@@ -1147,7 +1246,7 @@ function createCompactCard(item, type) {
 function createFeaturedCard(item, type) {
     const title = item.title || item.name || 'Untitled';
     const year = (item.release_date || item.first_air_date || '').slice(0, 4);
-    const backdrop = item.backdrop_path ? `${TMDB_IMG}w780${item.backdrop_path}` : (item.poster_path ? `${TMDB_IMG}w500${item.poster_path}` : '');
+    const backdrop = item.backdrop_path ? tmdbImg(item.backdrop_path, 'w780') : (item.poster_path ? tmdbImg(item.poster_path, 'w780') : '');
     const overview = item.overview || '';
     
     return `
@@ -1184,7 +1283,7 @@ function openFullPageResults(query, type) {
 
 function attachSearchEventListeners() {
     if (searchIcon) {
-        console.log('Attaching click listener to search icon');
+        // attach search listeners
         searchIcon.addEventListener('click', (e) => { 
             e.preventDefault();
             e.stopPropagation(); 
@@ -1201,19 +1300,17 @@ function attachSearchEventListeners() {
                 }
             });
         }
-    } else {
-        console.error('Search icon not found for event listener');
     }
     // Input listeners are handled in search-results.js to prevent conflicts
 }
 
 function attachOverlayEventListeners() {
     if (overlayClose) {
-        console.log('Attaching close button listener');
+        // attach close listener
         overlayClose.addEventListener('click', (e) => {
             e.preventDefault();
             e.stopPropagation();
-            console.log('Close button clicked');
+            // close button clicked
             closeSearch();
         });
     }
@@ -1260,13 +1357,16 @@ const trailerClose = trailerOverlay ? trailerOverlay.querySelector('.trailer-clo
 function openTrailer(key) {
     if (!trailerOverlay || !trailerFrame || !key) return;
     trailerOverlay.setAttribute('aria-hidden', 'false');
+    trailerOverlay.classList?.add('active');
     document.body.style.overflow = 'hidden';
-    const url = `https://www.youtube.com/embed/${key}?autoplay=1&mute=1&rel=0&modestbranding=1`;
+    const origin = (location && location.origin) ? encodeURIComponent(location.origin) : '';
+    const url = `https://www.youtube.com/embed/${key}?autoplay=1&mute=1&playsinline=1&rel=0&modestbranding=1&enablejsapi=1${origin ? `&origin=${origin}` : ''}`;
     trailerFrame.src = url;
 }
 function closeTrailer() {
     if (!trailerOverlay || !trailerFrame) return;
     trailerOverlay.setAttribute('aria-hidden', 'true');
+    trailerOverlay.classList?.remove('active');
     document.body.style.overflow = '';
     trailerFrame.src = '';
 }
@@ -1448,7 +1548,7 @@ function showPersonalizedGreeting() {
     ];
     
     const greeting = greetings[Math.floor(Math.random() * greetings.length)];
-    console.log(`${greeting}`);
+    // production: no console logs
     
     // Could be displayed in a toast notification
     const toast = document.createElement('div');
@@ -1483,8 +1583,8 @@ function showPersonalizedGreeting() {
     }, 4000);
 }
 
-// Show greeting after page load
-setTimeout(showPersonalizedGreeting, 2000);
+// Disable entrance greeting toast
+// setTimeout(showPersonalizedGreeting, 2000);
 
 // Mobile drawer interactions
 const hamburger = document.querySelector('.hamburger');

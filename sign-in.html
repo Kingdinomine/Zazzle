@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sign In • zazzle</title>
+  <link rel="stylesheet" href="auth-form.css" />
+  <link rel="icon" href="favicon.ico" type="image/x-icon">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800;900&display=swap" rel="stylesheet">
+  <style> body{margin:0} </style>
+  </head>
+<body>
+  <div class="container">
+    <form class="form" id="sign-in-form" action="">
+      <p class="title">Login Form</p>
+      <input placeholder="Email" class="username input" type="email" autocomplete="email" required />
+      <input placeholder="Password" class="password input" type="password" autocomplete="current-password" required />
+      <button class="btn" type="submit">Login</button>
+      <div class="auth-links-row">
+        <a href="reset-password.html">Forgot password?</a>
+        <a href="sign-up.html">Create account</a>
+      </div>
+      <div id="auth-msg"></div>
+    </form>
+  </div>
+  <script src="supabaseClient.js?v=20250904T141709"></script>
+  <script src="auth-pages.js"></script>
+</body>
+</html>

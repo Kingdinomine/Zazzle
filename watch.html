@@ -3,17 +3,18 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Cinematic Detail • zazzle</title>
+  <title>Watch • zazzle</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="styles.css" />
-  <link rel="stylesheet" href="auth.css" />
   <link rel="stylesheet" href="detail.css" />
+  <link rel="stylesheet" href="watch.css" />
+  <link rel="stylesheet" href="auth.css" />
   <link rel="icon" href="favicon.ico" type="image/x-icon">
 </head>
 <body>
-  <!-- Navigation Bar (transparent) -->
+  <!-- Navigation Bar (same as detail page) -->
   <nav class="navbar">
     <div class="nav-container">
       <div class="nav-left">
@@ -51,16 +52,56 @@
   <!-- Floating back button -->
   <button id="back-btn" class="back-btn" aria-label="Go back"><i data-lucide="arrow-left"></i><span>Back</span></button>
 
-  <!-- Trailer Overlay -->
-  <div id="trailer-overlay" class="trailer-overlay" aria-hidden="true" role="dialog" aria-modal="true">
-    <div class="trailer-backdrop"></div>
-    <div class="trailer-dialog" role="document">
-      <button class="trailer-close" aria-label="Close trailer"><i data-lucide="x"></i></button>
-      <div class="trailer-frame-wrap">
-        <iframe id="trailer-frame" src="" title="YouTube trailer" frameborder="0" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen></iframe>
-      </div>
-    </div>
+  <!-- Cinematic Background -->
+  <div class="watch-bg" aria-hidden="true">
+    <img id="watch-bg-img" class="watch-bg-image" alt="Background" />
+    <div class="watch-bg-overlay"></div>
+    <div id="watch-glow" class="watch-lighting"></div>
   </div>
+
+  <!-- Page Content -->
+  <main class="watch-content">
+    <!-- Player Card (frosted-glass with neon borders) -->
+    <section class="player-card">
+      <div class="player-aspect">
+        <video id="video" playsinline hidden></video>
+        <iframe id="frame" allow="autoplay; encrypted-media; fullscreen" allowfullscreen hidden></iframe>
+        <div class="preplay" id="preplay" aria-live="polite">
+          <div class="preplay-inner">
+            <div class="preplay-title" id="preplayHeading">Loading…</div>
+            <div class="preplay-sub">Starting in <span id="preplayCount">5</span>s</div>
+          </div>
+        </div>
+      </div>
+    </section>
+    <!-- Manual backup switch -->
+    <section class="player-controls" aria-label="Player Controls">
+      <button id="tryBackupBtn" class="btn" type="button">Try Backup</button>
+    </section>
+
+    <!-- Status banner under player -->
+    <div class="banner" id="banner" hidden></div>
+
+    <!-- Title & Overview -->
+    <section class="meta-section">
+      <h1 id="watch-title" class="reveal">Loading…</h1>
+      <p id="watch-overview" class="reveal" style="animation-delay:.06s"></p>
+    </section>
+
+    <!-- Episodes (TV only) - reuse detail.css layout -->
+    <section id="episodes-section" class="episodes-section" hidden>
+      <div class="season-selector">
+        <select id="season-select" aria-label="Select Season"></select>
+      </div>
+      <div id="episodes-grid" class="episodes-grid"></div>
+    </section>
+
+    <!-- Recommendations Row -->
+    <section class="recommend-section">
+      <h3 class="section-title">Recommended</h3>
+      <div id="recommend-row" class="recommend-scroller" role="list"></div>
+    </section>
+  </main>
 
   <!-- Mobile Drawer from global styles -->
   <div class="drawer-overlay" hidden></div>
@@ -72,79 +113,7 @@
     </nav>
   </aside>
 
-  <!-- Detail Page -->
-  <div class="detail-page">
-    <!-- Full-screen background -->
-    <div class="detail-bg">
-      <img id="detail-bg-img" class="detail-bg-image" alt="Background" />
-      <div class="detail-bg-overlay"></div>
-    </div>
-
-    <!-- Main content layout -->
-    <main class="detail-content">
-      <!-- Left section: Title, description, buttons, trailer -->
-      <section class="detail-left">
-        <div class="detail-info">
-          <h1 id="detail-title" class="detail-title">Loading…</h1>
-          <p id="detail-overview" class="detail-overview"></p>
-          
-          <div class="detail-actions">
-            <button id="watch-btn" class="watch-btn">
-              <span>WATCH</span>
-            </button>
-            <button id="watchlist-btn" class="watchlist-btn">
-              <i data-lucide="plus"></i>
-            </button>
-            <button id="favorites-btn" class="watchlist-btn" title="Add to Favorites">
-              <i data-lucide="heart"></i>
-            </button>
-          </div>
-        </div>
-
-        <!-- Trailer Section -->
-        <div id="trailer-section" class="trailer-section">
-          <div id="trailer-card" class="trailer-card" role="button" aria-label="Play trailer">
-            <img id="trailer-thumb" alt="Trailer thumbnail" loading="lazy" />
-            <div class="trailer-overlay">
-              <i data-lucide="play"></i>
-              <span>WATCH TRAILER</span>
-            </div>
-          </div>
-        </div>
-
-        <!-- Episodes Section (TV only) -->
-        <section id="episodes-section" class="episodes-section" hidden>
-          <div class="season-selector">
-            <select id="season-select" aria-label="Select Season"></select>
-          </div>
-          <div id="episodes-grid" class="episodes-grid"></div>
-        </section>
-      </section>
-
-      <!-- Right section: Cast -->
-      <aside class="detail-right">
-        <div class="cast-section">
-          <div class="cast-header">
-            <h3>Cast</h3>
-            <div class="cast-info">
-              <span id="cast-creator"></span>
-              <span id="cast-stars"></span>
-            </div>
-          </div>
-          <div id="cast-scroller" class="cast-scroller"></div>
-        </div>
-      </aside>
-    </main>
-  </div>
-
-  <!-- Libraries -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/motion@10/dist/motion.min.js"></script>
-  <script src="https://unpkg.com/lucide@latest"></script>
-  <!-- Supabase SDK auto-loaded by supabaseClient.js (UMD with fallback) -->
-  <script src="supabaseClient.js?v=20250904T141709"></script>
-  <script src="auth-ui.js"></script>
+  <!-- SW registration (versioned) -->
   <script>
     (function(){
       if (!('serviceWorker' in navigator)) return;
@@ -172,7 +141,12 @@
     })();
   </script>
 
+  <!-- Libraries & Clients -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <!-- Supabase SDK auto-loaded by supabaseClient.js (UMD with fallback) -->
+  <script src="supabaseClient.js?v=20250904T141709"></script>
+  <script src="auth-ui.js"></script>
   <!-- Page Script -->
-  <script src="detail.js"></script>
+  <script src="watch.js"></script>
 </body>
 </html>

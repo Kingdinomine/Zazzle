@@ -13,6 +13,18 @@
   const pageInfo = document.getElementById('page-info');
   const filterBar = document.getElementById('filter-bar');
 
+  // Image helpers — force PNG via images.weserv for best visual quality
+  const TMDB_IMG = (typeof window !== 'undefined' && window.TMDB_IMG) ? window.TMDB_IMG : 'https://image.tmdb.org/t/p/';
+  function pngify(url) {
+    if (!url) return '';
+    try { const clean = String(url).replace(/^https?:\/\//, ''); return `https://images.weserv.nl/?url=${encodeURIComponent(clean)}&output=png`; } catch { return url; }
+  }
+  function tmdbImg(path, size = 'w780') {
+    if (!path) return '';
+    if (/^https?:/i.test(path)) return pngify(path);
+    return pngify(`${TMDB_IMG}${size}${path}`);
+  }
+
   if (!grid || !sub || !featured || !pagination || !prevBtn || !nextBtn || !pageInfo) return;
 
   const params = new URLSearchParams(location.search);
@@ -47,28 +59,27 @@
   }
 
   function toCardHTML(item, idx) {
-    const title = (item.title || item.name || 'Untitled').replace(/"/g, '&quot;');
+    const title = (item.title || item.name || 'Untitled').replace(/\"/g, '&quot;');
     const year = (item.release_date || item.first_air_date || '').slice(0, 4);
-    const img = item.poster_path ? `${TMDB_IMG}w342${item.poster_path}` : '';
-    const imgTag = img ? `<img class="result-thumb" src="${img}" alt="${title}">` : `<div class="result-thumb placeholder" aria-hidden="true"></div>`;
+    const path = item.backdrop_path || item.poster_path || '';
+    const img = tmdbImg(path, 'w780');
     return `
-      <article class="result-card" role="listitem" data-idx="${idx}">
-        ${imgTag}
-        <div class="result-actions">
+      <article class="episode-card" role="listitem" data-idx="${idx}">
+        ${img ? `<img class="episode-thumb" src="${img}" loading="lazy" alt="${title}">` : `<div class="episode-thumb" style="background:rgba(255,255,255,.06)" aria-hidden="true"></div>`}
+        <div class="episode-meta">
+          <div class="episode-title">${title}</div>
+          <div>${year || ''}</div>
+        </div>
+        <div class="result-actions" style="position:absolute;top:8px;right:8px;">
           <button class="result-btn secondary" data-action="watch" data-idx="${idx}"><span>See More</span></button>
         </div>
-        <div class="result-meta">
-          <div class="result-title">${title}</div>
-          <div class="result-sub">${year || ''}</div>
-        </div>
-      </article>
-    `;
+      </article>`;
   }
 
   function toFeaturedHTML(item) {
-    const title = (item.title || item.name || 'Untitled').replace(/"/g, '&quot;');
+    const title = (item.title || item.name || 'Untitled').replace(/\"/g, '&quot;');
     const year = (item.release_date || item.first_air_date || '').slice(0, 4);
-    const bg = item.backdrop_path ? `${TMDB_IMG}w780${item.backdrop_path}` : (item.poster_path ? `${TMDB_IMG}w500${item.poster_path}` : '');
+    const bg = item.backdrop_path ? tmdbImg(item.backdrop_path, 'w1280') : (item.poster_path ? tmdbImg(item.poster_path, 'w780') : '');
     const imgTag = bg ? `<img class="featured-img" src="${bg}" alt="${title}">` : `<div class="featured-img placeholder" aria-hidden="true"></div>`;
     return `
       <article class="featured-card">
@@ -338,17 +349,29 @@
   // Delegate actions for cards
   if (grid) {
     grid.addEventListener('click', (e) => {
+      // If clicked on a button inside the card
       const btn = e.target.closest('.result-btn');
-      if (!btn) return;
-      const idx = parseInt(btn.getAttribute('data-idx') || '-1', 10);
-      if (!(idx >= 0 && idx < state.items.length)) return;
-      const item = state.items[idx];
-      const action = btn.getAttribute('data-action');
-      if (action === 'watch') {
+      if (btn) {
+        const idx = parseInt(btn.getAttribute('data-idx') || '-1', 10);
+        if (!(idx >= 0 && idx < state.items.length)) return;
+        const item = state.items[idx];
+        const action = btn.getAttribute('data-action');
+        if (action === 'watch') {
+          const destType = item.media_type ? (item.media_type === 'tv' ? 'tv' : 'movie') : (pageKind === 'tv' ? 'tv' : 'movie');
+          window.location.href = `detail.html?id=${item.id}&type=${destType}`;
+        } else if (action === 'trailer') {
+          try { if (typeof openTrailerForItem === 'function') openTrailerForItem(item); } catch (_) {}
+        }
+        return;
+      }
+      // If clicked anywhere on the episode card, navigate to details
+      const card = e.target.closest('.episode-card');
+      if (card && card.hasAttribute('data-idx')) {
+        const idx = parseInt(card.getAttribute('data-idx') || '-1', 10);
+        if (!(idx >= 0 && idx < state.items.length)) return;
+        const item = state.items[idx];
         const destType = item.media_type ? (item.media_type === 'tv' ? 'tv' : 'movie') : (pageKind === 'tv' ? 'tv' : 'movie');
         window.location.href = `detail.html?id=${item.id}&type=${destType}`;
-      } else if (action === 'trailer') {
-        try { if (typeof openTrailerForItem === 'function') openTrailerForItem(item); } catch (_) {}
       }
     });
   }
@@ -357,15 +380,24 @@
   if (featured) {
     featured.addEventListener('click', (e) => {
       const btn = e.target.closest('.featured-btn');
-      if (!btn) return;
-      const action = btn.getAttribute('data-action');
-      if (!state.items.length) return;
-      const item = state.items[0];
-      if (action === 'watch' || action === 'details') {
+      if (btn) {
+        const action = btn.getAttribute('data-action');
+        if (!state.items.length) return;
+        const item = state.items[0];
+        if (action === 'watch' || action === 'details') {
+          const destType = item.media_type ? (item.media_type === 'tv' ? 'tv' : 'movie') : (pageKind === 'tv' ? 'tv' : 'movie');
+          window.location.href = `detail.html?id=${item.id}&type=${destType}`;
+        } else if (action === 'trailer') {
+          try { if (typeof openTrailerForItem === 'function') openTrailerForItem(item); } catch (_) {}
+        }
+        return;
+      }
+      // Click anywhere on the featured card navigates to details
+      const card = e.target.closest('.featured-card');
+      if (card && state.items.length) {
+        const item = state.items[0];
         const destType = item.media_type ? (item.media_type === 'tv' ? 'tv' : 'movie') : (pageKind === 'tv' ? 'tv' : 'movie');
         window.location.href = `detail.html?id=${item.id}&type=${destType}`;
-      } else if (action === 'trailer') {
-        try { if (typeof openTrailerForItem === 'function') openTrailerForItem(item); } catch (_) {}
       }
     });
   }

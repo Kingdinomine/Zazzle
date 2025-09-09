@@ -7,6 +7,7 @@
     <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="all-results.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="icon" href="favicon.ico" type="image/x-icon">
 </head>
 <body>
     <!-- Navigation Bar -->
@@ -95,10 +96,10 @@
           const existingVer = localStorage.getItem('sw_v');
           const verSeed = (window.APP_VERSION || window.__BUILD_ID__ || existingVer || Date.now());
           if (!existingVer) { try { localStorage.setItem('sw_v', String(verSeed)); } catch(e){} }
-          const swUrl = `/service-worker.js?v=${encodeURIComponent(verSeed)}`;
+          const swUrl = `service-worker.js?v=${encodeURIComponent(verSeed)}`;
           const onLoad = async () => {
             try {
-              const reg = await navigator.serviceWorker.register(swUrl, { scope: '/' });
+              const reg = await navigator.serviceWorker.register(swUrl);
               try { await reg.update(); } catch(e){}
               try { navigator.serviceWorker.controller?.postMessage({ t: 'ping' }); } catch(e){}
             } catch (e) { console.warn('SW register (all-results) failed', e); }

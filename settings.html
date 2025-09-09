@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Profile Settings • zazzle</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="auth.css" />
+  <link rel="icon" href="favicon.ico" type="image/x-icon">
+  <style>
+    :root { --card-bg: rgba(10, 10, 11, 0.6); --border: rgba(255,255,255,0.12); }
+    body { background: #0a0a0b; }
+    .settings-wrap { max-width: 1000px; margin: 120px auto 80px; padding: 0 20px; }
+    .settings-grid { display: grid; grid-template-columns: 320px 1fr; gap: 24px; }
+    @media (max-width: 900px) { .settings-grid { grid-template-columns: 1fr; } }
+    .settings-card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 16px; padding: 20px; backdrop-filter: blur(10px); box-shadow: 0 10px 30px rgba(0,0,0,.25); }
+    .settings-title { font-size: 1.4rem; font-weight: 700; margin: 0 0 12px; }
+    .muted { opacity: .8; font-size: .95rem; }
+    .field { display: flex; flex-direction: column; gap: 6px; margin: 10px 0 14px; }
+    .field label { opacity: .85; font-size: .9rem; }
+    .field input { height: 44px; border-radius: 10px; border: 1px solid var(--border); background: rgba(255,255,255,0.02); color: #fff; padding: 0 12px; outline: none; }
+    .row { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+    .btn { height: 42px; border-radius: 10px; border: 1px solid var(--border); background: #fff; color: #111; font-weight: 700; padding: 0 14px; cursor: pointer; }
+    .btn.secondary { background: transparent; color: #fff; }
+    .btn[disabled] { opacity: .6; cursor: not-allowed; }
+    .avatar-box { display: grid; place-items: center; }
+    .avatar { width: 180px; height: 180px; border-radius: 999px; object-fit: cover; border: 1px solid var(--border); background: rgba(255,255,255,0.04); }
+    .spacer { height: 8px; }
+    #settings-msg { margin-top: 8px; min-height: 1.2em; color: #ffd; }
+  </style>
+</head>
+<body>
+  <!-- Navigation Bar (same as detail page) -->
+  <nav class="navbar">
+    <div class="nav-container">
+      <div class="nav-left">
+        <div class="logo">
+          <div class="brand-slot">
+            <a class="hbo-logo" id="brand-logo" href="index.html" data-text="zazzle">zazzle</a>
+          </div>
+        </div>
+      </div>
+
+      <div class="nav-center">
+        <ul class="nav-menu">
+          <li><a href="series.html" class="nav-link nav-link--series">SERIES</a></li>
+          <li><a href="movies.html" class="nav-link nav-link--movies">MOVIES</a></li>
+          <li><a href="animation.html" class="nav-link nav-link--animation">ANIMATION</a></li>
+        </ul>
+      </div>
+
+      <div class="nav-right">
+        <button class="hamburger" aria-label="Open menu" aria-controls="mobile-drawer" aria-expanded="false">
+          <span></span><span></span><span></span>
+        </button>
+        <div class="search-container" id="search">
+          <i class="search-icon" data-lucide="search"></i>
+          <span class="search-ghost" id="search-ghost" aria-hidden="true"></span>
+          <input class="search-input" type="text" placeholder="Search movies, series..." aria-label="Search" autocomplete="off" />
+          <div class="search-results-panel" id="search-results" aria-live="polite"></div>
+        </div>
+        <button class="get-hbo-btn">Sign up</button>
+        <button class="sign-in-btn">SIGN IN</button>
+      </div>
+    </div>
+  </nav>
+
+  <main class="settings-wrap">
+    <div class="settings-grid">
+      <aside class="settings-card avatar-box">
+        <img id="avatarPreview" class="avatar" alt="Avatar">
+        <div class="spacer"></div>
+        <div class="row">
+          <button id="avatarButton" class="btn" type="button">Upload Avatar</button>
+          <input id="avatarFile" type="file" accept="image/*" hidden />
+        </div>
+      </aside>
+
+      <section class="settings-card">
+        <h2 class="settings-title">Profile</h2>
+        <div class="muted" id="currentEmail">Loading email…</div>
+        <div class="field">
+          <label for="fullName">Full Name</label>
+          <input id="fullName" type="text" placeholder="Your name" autocomplete="name" />
+        </div>
+        <div class="field">
+          <label for="username">Username</label>
+          <input id="username" type="text" placeholder="@username" autocomplete="nickname" />
+        </div>
+        <div class="row">
+          <button id="saveProfile" class="btn" type="button">Save Profile</button>
+          <a class="btn secondary" href="watchlist.html">Open Watchlist</a>
+          <a class="btn secondary" href="favorites.html">Open Favorites</a>
+        </div>
+        <div class="spacer"></div>
+        <h2 class="settings-title" style="margin-top:18px">Account Email</h2>
+        <div class="field">
+          <label for="email">New Email</label>
+          <input id="email" type="email" placeholder="Enter new email" autocomplete="email" />
+        </div>
+        <div class="row">
+          <button id="updateEmailBtn" class="btn" type="button">Update Email</button>
+        </div>
+        <div id="settings-msg"></div>
+      </section>
+    </div>
+  </main>
+
+  <!-- Mobile Drawer from global styles -->
+  <div class="drawer-overlay" hidden></div>
+  <aside id="mobile-drawer" class="mobile-drawer" aria-hidden="true">
+    <nav class="drawer-nav" aria-label="Mobile Navigation">
+      <a href="series.html" class="drawer-link">Series</a>
+      <a href="movies.html" class="drawer-link">Movies</a>
+      <a href="animation.html" class="drawer-link">Animation</a>
+    </nav>
+  </aside>
+
+  <!-- Libraries & Clients -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <!-- Supabase SDK auto-loaded by supabaseClient.js (UMD with fallback) -->
+  <script src="supabaseClient.js?v=20250904T141709"></script>
+  <script src="auth-ui.js"></script>
+  <script src="settings.js"></script>
+</body>
+</html>

@@ -265,13 +265,13 @@ function updateSearchResults(query, movies, series) {
         srSeriesGrid.innerHTML = series.slice(0, 8).map(show => createResultCard(show, 'tv')).join('');
     }
     
-    // Show/hide "See All" buttons
+    // Show/hide "See All" buttons (show whenever we have any results)
     if (srSeeAllMoviesBtn) {
-        srSeeAllMoviesBtn.style.display = movies.length > 8 ? 'flex' : 'none';
+        srSeeAllMoviesBtn.style.display = movies.length > 0 ? 'flex' : 'none';
     }
     
     if (srSeeAllSeriesBtn) {
-        srSeeAllSeriesBtn.style.display = series.length > 8 ? 'flex' : 'none';
+        srSeeAllSeriesBtn.style.display = series.length > 0 ? 'flex' : 'none';
     }
     
     // Show empty state if no results
