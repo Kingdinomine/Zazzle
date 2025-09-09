@@ -2,15 +2,54 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover" />
   <title>Watch • zazzle</title>
+  <!-- Critical CSS: mobile-first nav to avoid flicker before external CSS loads -->
+  <style>
+    .nav-center .nav-menu { display: none !important; list-style: none; }
+    .hamburger { display: inline-flex !important; }
+    /* Hide desktop-only auth buttons on narrow screens to avoid reflow */
+    .get-hbo-btn, .sign-in-btn { display: none !important; }
+    /* Compact watch layout by default to avoid flicker into desktop sections */
+    .meta-section, .recommend-section, .episodes-section { display: none !important; }
+    /* Hard lock: if device is coarse pointer or <=1024px at boot, keep mobile layout regardless of later viewport changes */
+    html.mobile-watch .nav-center .nav-menu { display: none !important; }
+    html.mobile-watch .hamburger { display: inline-flex !important; }
+    html.mobile-watch .meta-section,
+    html.mobile-watch .recommend-section,
+    html.mobile-watch .episodes-section { display: none !important; }
+    @media (min-width: 1025px) {
+      .nav-center .nav-menu { display: flex !important; }
+      .hamburger { display: none !important; }
+      .get-hbo-btn, .sign-in-btn { display: inline-block !important; }
+    }
+    /* Reveal extras on large screens only */
+    @media (min-width: 1200px) {
+      html:not(.mobile-watch) .meta-section { display: grid !important; }
+      html:not(.mobile-watch) .recommend-section { display: block !important; }
+      html:not(.mobile-watch) .episodes-section { display: block !important; }
+    }
+  </style>
+  <script>
+    // Determine "mobile" before any external CSS loads and lock it using a class.
+    (function(){
+      try {
+        var isCoarse = window.matchMedia && window.matchMedia('(pointer: coarse)').matches;
+        var isMax1024 = window.matchMedia && window.matchMedia('(max-width: 1024px)').matches;
+        if (isCoarse || isMax1024) {
+          document.documentElement.classList.add('mobile-watch');
+        }
+      } catch (e) {}
+    })();
+  </script>
+  
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800;900&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css" />
-  <link rel="stylesheet" href="detail.css" />
-  <link rel="stylesheet" href="watch.css" />
-  <link rel="stylesheet" href="auth.css" />
+  <link rel="stylesheet" href="styles.css?v=20250909T1448" />
+  <link rel="stylesheet" href="detail.css?v=20250909T1448" />
+  <link rel="stylesheet" href="watch.css?v=20250909T1448" />
+  <link rel="stylesheet" href="auth.css?v=20250909T1448" />
   <link rel="icon" href="favicon.ico" type="image/x-icon">
 </head>
 <body>
@@ -83,7 +122,7 @@
     <div class="banner" id="banner" hidden></div>
 
     <!-- Title & Overview -->
-    <section class="meta-section">
+    <section class="meta-section" hidden>
       <h1 id="watch-title" class="reveal">Loading…</h1>
       <p id="watch-overview" class="reveal" style="animation-delay:.06s"></p>
     </section>
@@ -97,7 +136,7 @@
     </section>
 
     <!-- Recommendations Row -->
-    <section class="recommend-section">
+    <section class="recommend-section" hidden>
       <h3 class="section-title">Recommended</h3>
       <div id="recommend-row" class="recommend-scroller" role="list"></div>
     </section>

@@ -123,6 +123,10 @@ body {
 .episodes-section { max-width: 1000px; margin: 8px auto 0; }
 
 /* Responsive */
-@media (max-width: 768px) {
-  .watch-content { padding-top: 84px; }
+@media (max-width: 1024px) {
+  .watch-content { padding-top: 84px; gap: 16px; }
+  .player-card { width: 100%; }
+  .player-controls { width: 100%; justify-content: center; }
+  /* Keep watch page minimal on phones: no meta/recommendations/episodes */
+  .meta-section, .recommend-section, .episodes-section { display: none !important; }
 }

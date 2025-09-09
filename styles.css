@@ -159,7 +159,7 @@ body {
 }
 
 .nav-center .nav-menu {
-    display: flex;
+    display: none;
     list-style: none;
     gap: 2.5rem;
 }
@@ -1647,7 +1647,7 @@ body.results-page::before {
 
 /* Hamburger (hidden on desktop) */
 .hamburger {
-    display: none;
+    display: inline-flex;
     background: none;
     border: 0;
     width: 40px;
@@ -1756,14 +1756,13 @@ body.results-page::before {
     }
 }
 
-/* Tablet: collapse menu, show hamburger */
-@media (max-width: 1024px) {
+/* Desktop: show full menu, hide hamburger */
+@media (min-width: 1025px) {
     .nav-center .nav-menu {
-        display: none;
+        display: flex;
     }
-
     .hamburger {
-        display: inline-flex;
+        display: none;
     }
 }
 

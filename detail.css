@@ -87,11 +87,14 @@
 }
 
 .detail-overview {
-  font-size: 1.1rem;
+  font-size: clamp(0.95rem, 1.6vw, 1.1rem);
   line-height: 1.6;
   color: rgba(255, 255, 255, 0.9);
-  margin: 0 0 32px 0;
-  max-width: 500px;
+  margin: 0 0 24px 0;
+  max-width: min(700px, 100%);
+  overflow-wrap: anywhere;
+  word-break: normal;
+  hyphens: auto;
 }
 
 /* Action buttons */
@@ -489,6 +492,13 @@
   
   .watchlist-btn {
     align-self: flex-start;
+  }
+  /* Make description more compact and full-width on phones */
+  .detail-overview {
+    font-size: 0.95rem;
+    line-height: 1.55;
+    margin-bottom: 20px;
+    max-width: 100%;
   }
   /* Minimize season selector on small screens */
   .season-selector select {
